@@ -83,7 +83,7 @@ button.clear-btn { background:#c0392b; }
 </div>
 
 <script>
-let qrCounter = parseInt(localStorage.getItem('qrCounter') || '0');
+let qrCounter = 0; // reset on new session
 const container = document.getElementById('qr-container');
 let uploadedData = JSON.parse(localStorage.getItem('uploadedData') || '[]');
 let html5QrScanner;
@@ -94,15 +94,19 @@ function clearPage() {
   document.getElementById('mfg').value='';
   document.getElementById('warranty').value='';
   container.innerHTML='';
+  qrCounter = 0; // reset ID counter
 }
 
 function storeUploadedData(dataObj) {
-  uploadedData.push(dataObj);
-  localStorage.setItem('uploadedData', JSON.stringify(uploadedData));
+  // prevent duplicate ID
+  if(!uploadedData.some(d => d.ID === dataObj.ID)){
+    uploadedData.push(dataObj);
+    localStorage.setItem('uploadedData', JSON.stringify(uploadedData));
+  }
 }
 
 function createQRDiv(dataObj) {
-  container.innerHTML = ''; // clear old QR
+  container.innerHTML = ''; // clear old single QR
   const qrDiv = document.createElement('div');
   qrDiv.className = 'qr-item';
   QRCode.toDataURL(JSON.stringify(dataObj)).then(url => {
@@ -130,7 +134,6 @@ function generateQR() {
 
   if(mode===1){
     qrCounter++;
-    localStorage.setItem('qrCounter', qrCounter);
     const id = material.substring(0,3).toUpperCase() + qrCounter.toString().padStart(3,'0');
     const dataObj = {ID:id, Vendor:vendor, Material:material, MFG:mfg, Warranty:warranty, SupplyDate:supplyDate};
     createQRDiv(dataObj);
@@ -140,7 +143,6 @@ function generateQR() {
     const promises = [];
     for(let i=0;i<10;i++){
       qrCounter++;
-      localStorage.setItem('qrCounter', qrCounter);
       const id = material.substring(0,3).toUpperCase() + qrCounter.toString().padStart(3,'0');
       const dataObj = {ID:id, Vendor:vendor, Material:material, MFG:mfg, Warranty:warranty, SupplyDate:supplyDate};
       storeUploadedData(dataObj);
@@ -158,7 +160,7 @@ function generateQR() {
         link.textContent = "Download 10 QR Codes ZIP";
         link.style.display = "block";
         link.style.margin = "20px auto";
-        container.innerHTML=''; // clear old QR on home
+        container.innerHTML=''; // clear home
         container.appendChild(link);
       });
     });
@@ -219,6 +221,7 @@ function onScanSuccess(decodedText){
   }catch(e){ scanResultDiv.innerText = decodedText; }
 }
 
+// Camera setup
 Html5Qrcode.getCameras().then(camList => {
   cameras = camList;
   const select = document.getElementById('camera-select');

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DELETED DATA</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; background:#f4f6f8; text-align:center; margin:0; }
+nav { background:#2c3e50; padding:15px; }
+nav a { color:white; margin:0 15px; text-decoration:none; font-weight:bold; cursor:pointer; }
+h2 { margin-top:30px; color:#34495e; }
+.search-container { margin:20px auto; }
+.search-container input { padding:8px; width:300px; border-radius:5px; border:1px solid #ccc; }
+table { width:90%; max-width:900px; margin:20px auto; border-collapse: collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.1); }
+th, td { padding:12px 10px; border-bottom:1px solid #ddd; text-align:center; font-size:14px; }
+th { background:#2980b9; color:white; }
+tr:hover { background:#d1e7ff; }
+button { padding:5px 10px; border-radius:5px; border:none; cursor:pointer; font-weight:bold; margin:0 2px; }
+button.view-btn { background:#27ae60; color:white; }
+button.delete-btn { background:#c0392b; color:white; }
+button.delete-all-btn { background:#e67e22; color:white; margin-bottom:20px; }
+#info-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; }
+#info-modal .modal-content { background:white; padding:20px; border-radius:10px; width:350px; text-align:left; }
+#info-modal table { width:100%; border-collapse: collapse; margin-top:10px; }
+#info-modal th { background:#2980b9; color:white; padding:5px 8px; text-align:left; }
+#info-modal td { padding:5px 8px; }
+#info-modal tr:nth-child(even) td { background:#ecf0f1; }
+#info-modal tr:nth-child(odd) td { background:#fdfdfd; }
+#info-modal tr:hover td { background:#d1e7ff; }
+#qr-image { display:block; margin:10px auto; }
+#download-qr { display:block; margin:10px auto; padding:5px 10px; border:none; border-radius:5px; background:#2980b9; color:white; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a onclick="goTo('index.html')">Home</a>
+  <a onclick="goTo('upload.html')">Uploaded Data</a>
+  <a onclick="goTo('deleted.html')">Deleted Data</a>
+</nav>
+
+<div id="deleted-page">
+  <h2>DELETED DATA (Soft Deleted)</h2>
+
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="Search by ID, Vendor or Material" onkeyup="searchTable()">
+  </div>
+
+  <button class="delete-all-btn" onclick="deleteAllDeleted()">Delete All Permanently</button>
+
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Vendor</th>
+        <th>Material</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="info-modal">
+  <div class="modal-content">
+    <h3>QR Info</h3>
+    <table id="modal-table"></table>
+    <canvas id="qr-image"></canvas>
+    <button id="download-qr">Download QR</button>
+    <button onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+let deletedData = JSON.parse(localStorage.getItem('deletedData')) || [];
+
+// Save deleted data
+function saveDeletedData(){ localStorage.setItem('deletedData', JSON.stringify(deletedData)); }
+
+// Render table
+function renderTable(){
+  const tbody = document.querySelector('#data-table tbody');
+  tbody.innerHTML='';
+  deletedData.forEach((item,index)=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`
+      <td>${item.ID}</td>
+      <td>${item.Vendor}</td>
+      <td>${item.Material}</td>
+      <td>
+        <button class="view-btn" onclick="viewInfo(${index})">View</button>
+        <button class="delete-btn" onclick="deleteData(${index})">Delete Permanently</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// View info modal
+function viewInfo(index){
+  const modal=document.getElementById('info-modal');
+  const table=document.getElementById('modal-table');
+  const canvas=document.getElementById('qr-image');
+  const downloadBtn=document.getElementById('download-qr');
+  const data=deletedData[index];
+
+  table.innerHTML='';
+  for(const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
+    let val=data[key];
+    if(key==='Warranty') val=val+' months';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<th>${key}</th><td>${val}</td>`;
+    table.appendChild(tr);
+  }
+
+  QRCode.toCanvas(canvas, JSON.stringify(data), {width:200}, function(err){ if(err) console.error(err); });
+
+  downloadBtn.onclick=function(){
+    const link=document.createElement('a');
+    link.href=canvas.toDataURL("image/png");
+    link.download=data.ID+"_QR.png";
+    link.click();
+  }
+
+  modal.style.display='flex';
+}
+
+function closeModal(){ document.getElementById('info-modal').style.display='none'; }
+
+// Delete permanently
+function deleteData(index){
+  if(confirm('Permanently delete this record?')){
+    deletedData.splice(index,1);
+    saveDeletedData();
+    renderTable();
+  }
+}
+
+// Delete all permanently
+function deleteAllDeleted(){
+  if(confirm('Permanently delete ALL deleted data?')){
+    deletedData=[];
+    saveDeletedData();
+    renderTable();
+  }
+}
+
+// Search
+function searchTable(){
+  const input=document.getElementById('search-input').value.toUpperCase();
+  const rows=document.querySelectorAll('#data-table tbody tr');
+  rows.forEach(row=>{
+    const cells=row.getElementsByTagName('td');
+    let match=false;
+    for(let i=0;i<3;i++){ if(cells[i].innerText.toUpperCase().indexOf(input)>-1) match=true; }
+    row.style.display = match?'':'none';
+  });
+}
+
+renderTable();
+
+function goTo(page){ window.location.href = page; }
+</script>
+</body>
+</html>

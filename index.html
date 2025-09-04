@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAST THE TITLE</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<style>
+body { font-family: Arial, sans-serif; background:#f4f6f8; text-align:center; margin:0; }
+nav { background:#2c3e50; padding:15px; }
+nav a { color:white; margin:0 15px; text-decoration:none; font-weight:bold; cursor:pointer; }
+h2 { margin-top:30px; color:#34495e; }
+.form-container { background:white; display:inline-block; padding:25px; border-radius:10px; margin-top:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+.form-container label { display:block; margin:10px 0 5px; font-weight:bold; }
+.form-container input, select { padding:8px; width:250px; border-radius:5px; border:1px solid #ccc; }
+button { margin:15px 5px; padding:10px 20px; border-radius:5px; border:none; cursor:pointer; font-weight:bold; background:#27ae60; color:white; }
+button.clear-btn { background:#c0392b; }
+#qr-container { margin-top:30px; display:flex; flex-wrap:wrap; justify-content:center; gap:20px; }
+.qr-item { background:white; padding:15px; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.1); text-align:center; width:180px; }
+.qr-item img { display:block; margin:0 auto 10px; }
+.qr-item table { width:100%; border-collapse: collapse; text-align:left; margin:0 auto; }
+.qr-item th, .qr-item td { padding:5px 6px; font-size:12px; }
+.qr-item th { background:#2980b9; color:white; text-align:left; }
+.qr-item tr:nth-child(even) td { background:#ecf0f1; }
+.qr-item tr:nth-child(odd) td { background:#fdfdfd; }
+.qr-item tr:hover td { background:#d1e7ff; }
+.qr-item a { display:inline-block; margin-top:8px; text-decoration:none; color:#2980b9; font-weight:bold; }
+#scanner { margin-top:40px; }
+#camera-select { margin-bottom:10px; padding:5px; border-radius:5px; border:1px solid #ccc; }
+#scan-result table { width:250px; border-collapse: collapse; margin:10px auto; text-align:left; }
+#scan-result th { background:#2980b9; color:white; padding:5px 8px; text-align:left; }
+#scan-result td { padding:5px 8px; }
+#scan-result tr:nth-child(even) td { background:#ecf0f1; }
+#scan-result tr:nth-child(odd) td { background:#fdfdfd; }
+#scan-result tr:hover td { background:#d1e7ff; }
+</style>
+</head>
+<body>
+<nav>
+  <a onclick="goTo('index.html')">Home</a>
+  <a onclick="goTo('upload.html')">Uploaded Data</a>
+  <a onclick="goTo('deleted.html')">Deleted Data</a>
+</nav>
+
+<div id="home">
+  <h2>GENERATE THE QR CODE</h2>
+  <div class="form-container">
+    <label>Vendor Name:</label>
+    <input type="text" id="vendor" placeholder="Enter vendor name">
+    
+    <label>Material Type:</label>
+    <select id="material"><option>Elastic Rail Clip</option></select>
+    
+    <label>Manufacture Date:</label>
+    <input type="date" id="mfg">
+    
+    <label>Warranty Period (months):</label>
+    <input type="number" id="warranty" placeholder="Enter warranty period">
+    
+    <label>Mode:</label>
+    <select id="mode">
+      <option value="1">1 QR Code</option>
+      <option value="10">10 QR Codes</option>
+    </select>
+    
+    <button onclick="generateQR()">Generate QR Code</button>
+    <button class="clear-btn" onclick="clearPage()">Clear Page</button>
+  </div>
+  
+  <div id="qr-container"></div>
+  
+  <div id="scanner">
+    <h2>SCAN QR CODE</h2>
+    <select id="camera-select"></select>
+    <button onclick="startSelectedCamera()">Start Camera Scanner</button>
+    <div id="reader" style="width:300px;margin:20px auto;"></div>
+    <p>or upload QR image: <input type="file" id="qr-upload" accept="image/*" onchange="readQRFile(event)"></p>
+    <div id="scan-result"></div>
+  </div>
+</div>
+
+<script>
+let qrCounter = parseInt(localStorage.getItem('qrCounter') || '0');
+const container = document.getElementById('qr-container');
+let uploadedData = JSON.parse(localStorage.getItem('uploadedData') || '[]');
+let html5QrScanner;
+let cameras = [];
+
+function clearPage() {
+  document.getElementById('vendor').value='';
+  document.getElementById('mfg').value='';
+  document.getElementById('warranty').value='';
+  container.innerHTML='';
+}
+
+function storeUploadedData(dataObj) {
+  uploadedData.push(dataObj);
+  localStorage.setItem('uploadedData', JSON.stringify(uploadedData));
+}
+
+function createQRDiv(dataObj) {
+  container.innerHTML = ''; // clear old QR
+  const qrDiv = document.createElement('div');
+  qrDiv.className = 'qr-item';
+  QRCode.toDataURL(JSON.stringify(dataObj)).then(url => {
+    let tableHTML = '<table>';
+    for (const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
+      let val = dataObj[key];
+      if(key==='Warranty') val += ' months';
+      tableHTML += `<tr><th>${key}</th><td>${val}</td></tr>`;
+    }
+    tableHTML += '</table>';
+    qrDiv.innerHTML = `<img src="${url}" width="120">${tableHTML}<a href="${url}" download="${dataObj.ID}.png">Download</a>`;
+    container.appendChild(qrDiv);
+  });
+}
+
+function generateQR() {
+  const vendor = document.getElementById('vendor').value.trim();
+  const material = document.getElementById('material').value;
+  const mfg = document.getElementById('mfg').value;
+  const warranty = document.getElementById('warranty').value;
+  const mode = parseInt(document.getElementById('mode').value);
+  const supplyDate = new Date().toISOString().split('T')[0];
+
+  if (!vendor || !mfg || !warranty) { alert('Please fill all fields!'); return; }
+
+  if(mode===1){
+    qrCounter++;
+    localStorage.setItem('qrCounter', qrCounter);
+    const id = material.substring(0,3).toUpperCase() + qrCounter.toString().padStart(3,'0');
+    const dataObj = {ID:id, Vendor:vendor, Material:material, MFG:mfg, Warranty:warranty, SupplyDate:supplyDate};
+    createQRDiv(dataObj);
+    storeUploadedData(dataObj);
+  } else if(mode===10){
+    const zip = new JSZip();
+    const promises = [];
+    for(let i=0;i<10;i++){
+      qrCounter++;
+      localStorage.setItem('qrCounter', qrCounter);
+      const id = material.substring(0,3).toUpperCase() + qrCounter.toString().padStart(3,'0');
+      const dataObj = {ID:id, Vendor:vendor, Material:material, MFG:mfg, Warranty:warranty, SupplyDate:supplyDate};
+      storeUploadedData(dataObj);
+      const p = QRCode.toDataURL(JSON.stringify(dataObj)).then(url=>{
+        const imgData = url.replace(/^data:image\/(png|jpg);base64,/, "");
+        zip.file(`${id}.png`, imgData, {base64:true});
+      });
+      promises.push(p);
+    }
+    Promise.all(promises).then(()=>{
+      zip.generateAsync({type:"blob"}).then(function(content){
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = "10_QRs.zip";
+        link.textContent = "Download 10 QR Codes ZIP";
+        link.style.display = "block";
+        link.style.margin = "20px auto";
+        container.innerHTML=''; // clear old QR on home
+        container.appendChild(link);
+      });
+    });
+  }
+}
+
+function goTo(page){ window.location.href = page; }
+
+function readQRFile(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    const img = new Image();
+    img.src = reader.result;
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width; canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img,0,0);
+      const imageData = ctx.getImageData(0,0,canvas.width, canvas.height);
+      const code = jsQR(imageData.data, canvas.width, canvas.height);
+      const scanResultDiv = document.getElementById('scan-result');
+      scanResultDiv.innerHTML = '';
+      if(code){
+        try{
+          const dataObj = JSON.parse(code.data);
+          storeUploadedData(dataObj);
+          let tableHTML = '<table>';
+          for(const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
+            let val = dataObj[key];
+            if(key==='Warranty') val += ' months';
+            tableHTML += `<tr><th>${key}</th><td>${val}</td></tr>`;
+          }
+          tableHTML += '</table>';
+          scanResultDiv.innerHTML = tableHTML;
+        }catch(e){ scanResultDiv.innerText = "QR data is not valid JSON"; }
+      }else{ scanResultDiv.innerText = "Cannot read QR"; }
+    }
+  }
+  reader.readAsDataURL(file);
+}
+
+function onScanSuccess(decodedText){
+  const scanResultDiv = document.getElementById('scan-result');
+  scanResultDiv.innerHTML = '';
+  try{
+    const dataObj = JSON.parse(decodedText);
+    storeUploadedData(dataObj);
+    let tableHTML = '<table>';
+    for(const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
+      let val = dataObj[key];
+      if(key==='Warranty') val += ' months';
+      tableHTML += `<tr><th>${key}</th><td>${val}</td></tr>`;
+    }
+    tableHTML += '</table>';
+    scanResultDiv.innerHTML = tableHTML;
+  }catch(e){ scanResultDiv.innerText = decodedText; }
+}
+
+Html5Qrcode.getCameras().then(camList => {
+  cameras = camList;
+  const select = document.getElementById('camera-select');
+  if(cameras && cameras.length){
+    cameras.forEach((cam, idx) => {
+      const option = document.createElement('option');
+      option.value = cam.id;
+      option.text = cam.label || `Camera ${idx+1}`;
+      select.appendChild(option);
+    });
+  }
+}).catch(err => console.error(err));
+
+function startSelectedCamera(){
+  const select = document.getElementById('camera-select');
+  const cameraId = select.value;
+  if(!cameraId) { alert("No camera available!"); return; }
+  if(html5QrScanner) html5QrScanner.stop().then(() => startCamera(cameraId));
+  else startCamera(cameraId);
+}
+
+function startCamera(cameraId){
+  html5QrScanner = new Html5Qrcode("reader");
+  html5QrScanner.start(
+    { deviceId: { exact: cameraId } },
+    { fps: 10, qrbox: 250 },
+    onScanSuccess
+  ).catch(err=>console.error(err));
+}
+</script>
+</body>
+</html>

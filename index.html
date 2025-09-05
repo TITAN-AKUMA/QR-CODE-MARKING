@@ -14,11 +14,11 @@
 <style>
 body { font-family: Arial,sans-serif; background:#f4f6f8; margin:0; padding:0;}
 nav { display:flex; justify-content:space-between; align-items:center; padding:10px 15px; background:#1d6166; color:white; flex-wrap:wrap; }
-.nav-left { display: flex; align-items: center; margin-bottom: 5px; }
-.nav-left img { width:40px; height:40px; border-radius:5px; margin-right:10px; }
-.nav-left h1 { font-size:20px; margin:0; }
-.nav-right a { color:white; margin-left:10px; text-decoration:none; font-weight:bold; }
-.nav-right a:hover { text-decoration:underline; color:#ecf0f1; }
+.nav-left { cursor: default; display: flex; align-items: center; margin-bottom: 5px; }
+.nav-left img { cursor: default; width:40px; height:40px; border-radius:5px; margin-right:10px; }
+.nav-left h1 { cursor: default; font-size:20px; margin:0; }
+.nav-right a { cursor: default; color:white; margin-left:10px; text-decoration:none; font-weight:bold; }
+.nav-right a:hover { cursor: default; text-decoration:underline; color:#ecf0f1; }
 
 h2 { text-align:center; color:#34495e; margin-top:20px; font-size:18px;}
 .form-container { max-width:400px; margin:20px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1);}
@@ -69,7 +69,7 @@ button.clear-btn { background:#c0392b; }
 </nav>
 
 <div id="home">
-  <h2>GENERATE QR CODE</h2>
+  <h2 style="cursor: default;">GENERATE QR CODE</h2>
   <div class="form-container">
     <label>Vendor Name:</label>
     <input type="text" id="vendor" placeholder="Enter vendor name">
@@ -101,11 +101,11 @@ button.clear-btn { background:#c0392b; }
   <div id="qr-container"></div>
   
   <div id="scanner">
-    <h2>SCAN QR CODE</h2>
+    <h2 style="cursor: default;">SCAN QR CODE</h2>
     <select id="camera-select"></select>
     <button onclick="startSelectedCamera()">Start Scanner</button>
     <div id="reader"></div>
-    <p>or upload QR image: <input type="file" id="qr-upload" accept="image/*" onchange="readQRFile(event)"></p>
+    <p style="cursor: default;">or upload QR image: <input type="file" id="qr-upload" accept="image/*" onchange="readQRFile(event)"></p>
     <div id="scan-result"></div>
   </div>
 </div>

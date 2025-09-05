@@ -3,52 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UPLOADED DATA</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<title>Uploaded Data - QR System</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <style>
-body { font-family: Arial, sans-serif; background: #f4f6f8; margin:0; text-align:center; }
-nav { background:#2c3e50; padding:15px; }
-nav a { color:white; margin:0 15px; text-decoration:none; font-weight:bold; cursor:pointer; }
-h2 { margin-top:30px; color:#34495e; }
-.search-container { margin:20px auto; }
-.search-container input { padding:8px; width:300px; border-radius:5px; border:1px solid #ccc; }
-table { width:90%; max-width:900px; margin:20px auto; border-collapse: collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.1); }
-th, td { padding:12px 10px; border-bottom:1px solid #ddd; text-align:center; font-size:14px; }
+body { font-family: Arial, sans-serif; background: #f4f6f8; text-align:center; margin:0; }
+nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background:#2c3e50; color:white; flex-wrap: wrap; }
+.nav-left { display: flex; align-items: center; margin-bottom: 5px; }
+.team-logo { width: 40px; height: 40px; margin-right: 10px; border-radius: 8px; }
+.EDT { font-size: 20px; margin:0; }
+.nav-right a { color:white; margin-left: 10px; text-decoration:none; font-weight:bold; }
+.nav-right a:hover { text-decoration: underline; color:#ecf0f1; }
+
+h2 { margin-top:20px; color:#34495e; font-size:18px; }
+.search-container { margin:15px auto; }
+.search-container input { padding:8px; width:90%; max-width:300px; border-radius:5px; border:1px solid #ccc; }
+
+table { width:95%; max-width:900px; margin:15px auto; border-collapse: collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.1); font-size:12px; }
+th, td { padding:10px 6px; border-bottom:1px solid #ddd; text-align:center; word-break:break-word; }
 th { background:#2980b9; color:white; }
 tr:hover { background:#d1e7ff; }
-button { padding:5px 10px; border-radius:5px; border:none; cursor:pointer; font-weight:bold; margin:0 2px; }
+
+button { padding:5px 8px; border-radius:5px; border:none; cursor:pointer; font-weight:bold; margin:2px; font-size:12px; }
 button.view-btn { background:#27ae60; color:white; }
 button.delete-btn { background:#c0392b; color:white; }
-button.delete-all-btn { background:#e67e22; color:white; margin-bottom:20px; }
-#info-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; }
-#info-modal .modal-content { background:white; padding:20px; border-radius:10px; width:350px; text-align:left; }
-#info-modal table { width:100%; border-collapse: collapse; margin-top:10px; }
-#info-modal th { background:#2980b9; color:white; padding:5px 8px; text-align:left; }
-#info-modal td { padding:5px 8px; }
+button.delete-all-btn { background:#e67e22; color:white; margin-bottom:10px; }
+
+#info-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; padding:10px; box-sizing:border-box; }
+#info-modal .modal-content { background:white; padding:15px; border-radius:10px; width:95%; max-width:350px; text-align:left; }
+#info-modal table { width:100%; border-collapse: collapse; margin-top:10px; font-size:12px; }
+#info-modal th { background:#2980b9; color:white; padding:5px 6px; text-align:left; }
+#info-modal td { padding:5px 6px; }
 #info-modal tr:nth-child(even) td { background:#ecf0f1; }
 #info-modal tr:nth-child(odd) td { background:#fdfdfd; }
 #info-modal tr:hover td { background:#d1e7ff; }
-#qr-image { display:block; margin:10px auto; }
-#download-qr { display:block; margin:10px auto; padding:5px 10px; border:none; border-radius:5px; background:#2980b9; color:white; cursor:pointer; }
+#qr-image { display:block; margin:10px auto; max-width:100%; }
+#download-qr { display:block; margin:10px auto; padding:5px 10px; border:none; border-radius:5px; background:#2980b9; color:white; cursor:pointer; font-size:12px; }
+
+/* MOBILE RESPONSIVE TABLE */
+@media screen and (max-width:600px){
+  th, td { font-size:10px; padding:8px 4px; }
+  .nav-right a { margin-left:8px; font-size:12px; }
+  h2 { font-size:16px; }
+  button { font-size:10px; padding:4px 6px; }
+}
 </style>
 </head>
 <body>
 
 <nav>
-  <a onclick="goTo('index.html')">Home</a>
-  <a onclick="goTo('upload.html')">Uploaded Data</a>
-  <a onclick="goTo('deleted.html')">Deleted Data</a>
+  <div class="nav-left">
+    <img src="logo.png" alt="Team Logo" class="team-logo">
+    <h1 class="EDT">INFINITE INNOVATORS</h1>
+  </div>
+  <div class="nav-right">
+    <a onclick="goTo('index.html')">Home</a>
+    <a onclick="goTo('upload.html')">Uploaded Data</a>
+  </div>
 </nav>
 
 <div id="upload-page">
   <h2>UPLOADED DATA</h2>
-
   <div class="search-container">
-    <input type="text" id="search-input" placeholder="Search by ID, Vendor or Material" onkeyup="searchTable()">
+    <input type="text" id="search-input" placeholder="Search by ID, Vendor, Material" onkeyup="searchTable()">
   </div>
-
   <button class="delete-all-btn" onclick="deleteAll()">Delete All</button>
-
   <table id="data-table">
     <thead>
       <tr>
@@ -58,9 +76,7 @@ button.delete-all-btn { background:#e67e22; color:white; margin-bottom:20px; }
         <th>Actions</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- Data rows will appear here -->
-    </tbody>
+    <tbody></tbody>
   </table>
 </div>
 
@@ -74,88 +90,110 @@ button.delete-all-btn { background:#e67e22; color:white; margin-bottom:20px; }
   </div>
 </div>
 
-<script>
-let uploadedData = JSON.parse(localStorage.getItem('uploadedData')) || [];
-let deletedData = JSON.parse(localStorage.getItem('deletedData')) || [];
+<script type="module">
+// ===== FIREBASE SETUP =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, get, child, query, orderByChild } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// Save uploaded and deleted data
-function saveData(){
-  localStorage.setItem('uploadedData', JSON.stringify(uploadedData));
-  localStorage.setItem('deletedData', JSON.stringify(deletedData));
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyCzzNaUWyBn_z7A5Rjt_ooR3yEfA44heJA",
+  authDomain: "laserqr-fd4fa.firebaseapp.com",
+  databaseURL: "https://laserqr-fd4fa-default-rtdb.firebaseio.com",
+  projectId: "laserqr-fd4fa",
+  storageBucket: "laserqr-fd4fa.appspot.com",
+  messagingSenderId: "191584527271",
+  appId: "1:191584527271:web:71dad945fa1b18c0024c82",
+  measurementId: "G-88ZMKEZT24"
+};
 
-// Render uploaded data
-function renderTable(){
-  const tbody = document.querySelector('#data-table tbody');
-  tbody.innerHTML = '';
-  uploadedData.forEach((item,index)=>{
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${item.ID}</td>
-      <td>${item.Vendor}</td>
-      <td>${item.Material}</td>
-      <td>
-        <button class="view-btn" onclick="viewInfo(${index})">View</button>
-        <button class="delete-btn" onclick="deleteData(${index})">Delete</button>
-      </td>
-    `;
-    tbody.appendChild(row);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const uploadedRef = ref(db, 'uploadedData');
+const deletedRef = ref(db, 'deletedData');
+
+// ===== FETCH & DISPLAY =====
+function fetchUploadedData() {
+  onValue(uploadedRef, snapshot => {
+    const tbody = document.querySelector('#data-table tbody');
+    tbody.innerHTML = '';
+    snapshot.forEach(snapItem => {
+      const data = snapItem.val();
+      const key = snapItem.key;
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${data.ID}</td>
+        <td>${data.Vendor}</td>
+        <td>${data.Material}</td>
+        <td>
+          <button class="view-btn" onclick="viewInfo('${key}')">View</button>
+          <button class="delete-btn" onclick="deleteData('${key}')">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
   });
 }
 
-// View info modal
-function viewInfo(index){
-  const modal = document.getElementById('info-modal');
-  const table = document.getElementById('modal-table');
-  const canvas = document.getElementById('qr-image');
-  const downloadBtn = document.getElementById('download-qr');
-  const data = uploadedData[index];
+// ===== VIEW QR =====
+window.viewInfo = function(key){
+  get(child(uploadedRef, key)).then(snap=>{
+    if(!snap.exists()) return;
+    const data = snap.val();
+    const modal = document.getElementById('info-modal');
+    const table = document.getElementById('modal-table');
+    const canvas = document.getElementById('qr-image');
+    const downloadBtn = document.getElementById('download-qr');
 
-  table.innerHTML = '';
-  for(const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
-    let val = data[key];
-    if(key==='Warranty') val = val + ' months';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<th>${key}</th><td>${val}</td>`;
-    table.appendChild(tr);
-  }
+    table.innerHTML = '';
+    for(const k of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
+      if(data[k]===undefined) continue;
+      let val = data[k];
+      if(k==='Warranty') val += ' months';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<th>${k}</th><td>${val}</td>`;
+      table.appendChild(tr);
+    }
 
-  QRCode.toCanvas(canvas, JSON.stringify(data), {width:200}, function(err){ if(err) console.error(err); });
+    QRCode.toCanvas(canvas, JSON.stringify(data), {width:200}, function(err){ if(err) console.error(err); });
 
-  downloadBtn.onclick = function(){
-    const link=document.createElement('a');
-    link.href = canvas.toDataURL("image/png");
-    link.download = data.ID + "_QR.png";
-    link.click();
-  }
+    downloadBtn.onclick = function(){
+      const link=document.createElement('a');
+      link.href = canvas.toDataURL("image/png");
+      link.download = data.ID + "_QR.png";
+      link.click();
+    }
 
-  modal.style.display='flex';
+    modal.style.display='flex';
+  });
 }
 
-function closeModal(){ document.getElementById('info-modal').style.display='none'; }
+window.closeModal = function(){ document.getElementById('info-modal').style.display='none'; }
 
-// Soft delete: move to deletedData
-function deleteData(index){
+// ===== DELETE =====
+window.deleteData = function(key){
   if(confirm('Are you sure to delete this record?')){
-    deletedData.push(uploadedData[index]);
-    uploadedData.splice(index,1);
-    saveData();
-    renderTable();
+    get(child(uploadedRef,key)).then(snap=>{
+      if(snap.exists()){
+        push(deletedRef, snap.val());
+        remove(child(uploadedRef,key));
+      }
+    });
   }
 }
 
-// Delete all: move all to deletedData
-function deleteAll(){
+window.deleteAll = function(){
   if(confirm('Move ALL uploaded data to Deleted Data?')){
-    deletedData = deletedData.concat(uploadedData);
-    uploadedData = [];
-    saveData();
-    renderTable();
+    onValue(uploadedRef, snapshot=>{
+      snapshot.forEach(snapItem=>{
+        push(deletedRef, snapItem.val());
+        remove(child(uploadedRef,snapItem.key));
+      });
+    }, {onlyOnce:true});
   }
 }
 
-// Search
-function searchTable(){
+// ===== SEARCH =====
+window.searchTable = function(){
   const input = document.getElementById('search-input').value.toUpperCase();
   const rows = document.querySelectorAll('#data-table tbody tr');
   rows.forEach(row=>{
@@ -166,16 +204,31 @@ function searchTable(){
   });
 }
 
-// Add new QR record from home page
-function addNewQR(data){
-  uploadedData.push(data);
-  saveData();
-  renderTable();
+// ===== ADD NEW UNIQUE QR =====
+window.addNewQR = async function(data){
+  const q = query(uploadedRef, orderByChild('Vendor'));
+  const snap = await get(q);
+  let exists = false;
+  snap.forEach(s=>{
+    if(s.val().Vendor === data.Vendor && s.val().Material === data.Material){
+      exists = true;
+    }
+  });
+  if(exists){ alert('Duplicate entry! Not added.'); return; }
+
+  let maxID = 0;
+  snap.forEach(s=>{
+    const id = parseInt(s.val().ID);
+    if(id > maxID) maxID = id;
+  });
+  data.ID = maxID+1;
+  push(uploadedRef, data);
 }
 
-renderTable();
+// ===== NAVIGATION =====
+window.goTo = function(page){ window.location.href = page; }
 
-function goTo(page){ window.location.href = page; }
+fetchUploadedData();
 </script>
 </body>
 </html>

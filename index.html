@@ -6,10 +6,10 @@
 <title>Indian Railways Track Fittings QR System</title>
 
 <!-- QR Code Libraries -->
-<script type="module" src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 
 <style>
 body { font-family: Arial,sans-serif; background:#f4f6f8; margin:0; padding:0;}
@@ -39,7 +39,7 @@ button.clear-btn { background:#c0392b; }
 
 #scanner { margin:30px auto; max-width:350px; text-align:center;}
 #camera-select { width:100%; margin-bottom:10px; padding:6px; border-radius:5px; border:1px solid #ccc; }
-#reader { width:100%; margin:15px auto; }
+#reader { width:100%; margin:15px auto; min-height:250px; }
 #scan-result table { width:100%; border-collapse: collapse; margin:10px 0; font-size:12px;}
 #scan-result th { background:#2980b9; color:white; padding:4px; }
 #scan-result td { padding:4px; }
@@ -112,7 +112,7 @@ button.clear-btn { background:#c0392b; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzzNaUWyBn_z7A5Rjt_ooR3yEfA44heJA",
@@ -124,49 +124,52 @@ const firebaseConfig = {
   appId: "1:191584527271:web:71dad945fa1b18c0024c82",
   measurementId: "G-88ZMKEZT24"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const qrDataRef = ref(db, 'qrData');
 const uploadedRef = ref(db, 'uploadedData');
 
-// NAVIGATION
 window.goTo = (page)=>{ window.location.href=page; };
 
-// ---- GENERATE QR ----
+// ----- GENERATE QR -----
+// (code unchanged)
 async function createQRDiv(dataObj){
-  const container=document.getElementById('qr-container');
-  container.innerHTML='';
+  const container = document.getElementById('qr-container');
   const url = await QRCode.toDataURL(JSON.stringify(dataObj));
-  const div=document.createElement('div');
-  div.className='qr-item';
-  let tableHTML='<table>';
+  const div = document.createElement('div');
+  div.className = 'qr-item';
+  let tableHTML = '<table>';
   for(const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
-    let val=dataObj[key]; if(key==='Warranty') val+=' months';
-    tableHTML+=`<tr><th>${key}</th><td>${val}</td></tr>`;
+    let val = dataObj[key]; if(key==='Warranty') val+=' months';
+    tableHTML += `<tr><th>${key}</th><td>${val}</td></tr>`;
   }
-  tableHTML+='</table>';
-  div.innerHTML=`<img src="${url}" width="120">${tableHTML}<a href="${url}" download="${dataObj.ID}.png">Download</a>`;
+  tableHTML += '</table>';
+  div.innerHTML = `<img src="${url}" width="120">${tableHTML}<a href="${url}" download="${dataObj.ID}.png">Download</a>`;
   container.appendChild(div);
 }
 
 window.generateQR = async function(){
-  const vendor=document.getElementById('vendor').value.trim();
-  const material=document.getElementById('material').value;
-  const mfg=document.getElementById('mfg').value;
-  const warranty=document.getElementById('warranty').value;
-  const mode=parseInt(document.getElementById('mode').value);
-  const supplyDate=new Date().toISOString().split('T')[0];
+  const vendor = document.getElementById('vendor').value.trim();
+  const material = document.getElementById('material').value;
+  const mfg = document.getElementById('mfg').value;
+  const warranty = document.getElementById('warranty').value;
+  const mode = parseInt(document.getElementById('mode').value);
+  const supplyDate = new Date().toISOString().split('T')[0];
 
   if(!vendor || !mfg || !warranty){ alert('Fill all fields!'); return; }
 
   const snap = await get(qrDataRef);
   let existingIDs = snap.exists()? Object.keys(snap.val()):[];
-  let maxCounter=0;
-  existingIDs.forEach(id=>{ const num=parseInt(id.replace(/\D/g,'')); if(num>maxCounter) maxCounter=num; });
+  let maxCounter = 0;
+  existingIDs.forEach(id => { const num = parseInt(id.replace(/\D/g,'')); if(num>maxCounter) maxCounter=num; });
+
+  const container = document.getElementById('qr-container');
+  container.innerHTML = '';
 
   if(mode===1){
     const counter=maxCounter+1;
-    const id=material.substring(0,3).toUpperCase()+counter.toString().padStart(3,'0');
+    const id = material.substring(0,3).toUpperCase()+counter.toString().padStart(3,'0');
     const dataObj={ID:id,Vendor:vendor,Material:material,MFG:mfg,Warranty:warranty,SupplyDate:supplyDate};
     await createQRDiv(dataObj);
     set(ref(db,'qrData/'+id), dataObj);
@@ -176,24 +179,23 @@ window.generateQR = async function(){
     const promises = [];
     for(let i=0;i<10;i++){
       const counter=maxCounter+i+1;
-      const id=material.substring(0,3).toUpperCase()+counter.toString().padStart(3,'0');
+      const id = material.substring(0,3).toUpperCase()+counter.toString().padStart(3,'0');
       const dataObj={ID:id,Vendor:vendor,Material:material,MFG:mfg,Warranty:warranty,SupplyDate:supplyDate};
       set(ref(db,'qrData/'+id), dataObj);
       set(ref(db,'uploadedData/'+id), dataObj);
       promises.push(QRCode.toDataURL(JSON.stringify(dataObj)).then(url=>{
-        const imgData=url.replace(/^data:image\/(png|jpg);base64,/,'');
-        zip.file(`${id}.png`, imgData,{base64:true});
+        const imgData = url.replace(/^data:image\/(png|jpg);base64,/, '');
+        zip.file(`${id}.png`, imgData, {base64:true});
       }));
     }
     await Promise.all(promises);
     const content = await zip.generateAsync({type:"blob"});
-    const link=document.createElement('a');
-    link.href=URL.createObjectURL(content);
-    link.download="10_QRs.zip";
-    link.textContent="Download 10 QR Codes ZIP";
-    link.style.display="block"; link.style.margin="20px auto";
-    document.getElementById('qr-container').innerHTML='';
-    document.getElementById('qr-container').appendChild(link);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(content);
+    link.download = "10_QRs.zip";
+    link.textContent = "Download 10 QR Codes ZIP";
+    link.style.display = "block"; link.style.margin = "20px auto";
+    container.appendChild(link);
   }
 }
 
@@ -230,7 +232,13 @@ window.startSelectedCamera=function(){
 
 function startCamera(cameraId){
   html5QrScanner = new Html5Qrcode("reader");
-  html5QrScanner.start({deviceId:{exact:cameraId}},{fps:10,qrbox:250}, onScanSuccess).catch(console.error);
+  // FIXED: pass cameraId as string
+  html5QrScanner.start(
+    cameraId,
+    { fps:10, qrbox:250 },
+    onScanSuccess,
+    errorMessage => { console.warn(errorMessage); }
+  ).catch(console.error);
 }
 
 function onScanSuccess(decodedText){

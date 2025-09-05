@@ -3,295 +3,280 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Indian Railways Track Fittings QR System</title>
-
-<!-- QR Code Libraries -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<title>Infinite Innovators - Login</title>
 
 <style>
-body { font-family: Arial,sans-serif; background:#f4f6f8; margin:0; padding:0;}
-nav { display:flex; justify-content:space-between; align-items:center; padding:10px 15px; background:#1d6166; color:white; flex-wrap:wrap; }
-.nav-left { cursor: default; display: flex; align-items: center; margin-bottom: 5px; }
-.nav-left img { cursor: default; width:40px; height:40px; border-radius:5px; margin-right:10px; }
-.nav-left h1 { cursor: default; font-size:20px; margin:0; }
-.nav-right a { cursor: default; color:white; margin-left:10px; text-decoration:none; font-weight:bold; }
-.nav-right a:hover { cursor: default; text-decoration:underline; color:#ecf0f1; }
+body {
+  margin: 0; padding: 0;
+  font-family: "Poppins", sans-serif;
+  height: 100vh;
+  display: flex; justify-content: center; align-items: center;
+  background: linear-gradient(135deg, #1d6166, #0f2027);
+  overflow: hidden;
+}
 
-h2 { text-align:center; color:#34495e; margin-top:20px; font-size:18px;}
-.form-container { max-width:400px; margin:20px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1);}
-.form-container label { display:block; margin:10px 0 5px; font-weight:bold; }
-.form-container input, .form-container select { width:100%; padding:8px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px; }
-button { padding:10px 15px; border:none; border-radius:5px; background:#27ae60; color:white; font-weight:bold; cursor:pointer; margin:5px 0; width:48%; font-size:14px;}
-button.clear-btn { background:#c0392b; }
+.container {
+  width: 350px; height: 500px;
+  perspective: 1000px;
+}
 
-#qr-container { display:flex; flex-wrap:wrap; justify-content:center; gap:15px; margin:20px;}
-.qr-item { background:white; padding:15px; border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.1); text-align:center; width:180px; }
-.qr-item img { width:120px; margin-bottom:10px;}
-.qr-item table { width:100%; border-collapse: collapse; font-size:12px;}
-.qr-item th { background:#2980b9; color:white; padding:4px; text-align:left;}
-.qr-item td { padding:4px; text-align:left;}
-.qr-item tr:nth-child(even) td { background:#ecf0f1;}
-.qr-item tr:nth-child(odd) td { background:#fdfdfd;}
-.qr-item a { display:block; margin-top:8px; text-decoration:none; color:#2980b9; font-weight:bold;}
+.card {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1s;
+}
 
-#scanner { margin:30px auto; max-width:350px; text-align:center;}
-#camera-select { width:100%; margin-bottom:10px; padding:6px; border-radius:5px; border:1px solid #ccc; }
-#reader { width:100%; margin:15px auto; min-height:250px; }
-#scan-result table { width:100%; border-collapse: collapse; margin:10px 0; font-size:12px;}
-#scan-result th { background:#2980b9; color:white; padding:4px; }
-#scan-result td { padding:4px; }
-#scan-result tr:nth-child(even) td { background:#ecf0f1;}
-#scan-result tr:nth-child(odd) td { background:#fdfdfd;}
-#scan-result tr:hover td { background:#d1e7ff; }
+.card.flip {
+  transform: rotateY(180deg);
+}
 
-/* MOBILE RESPONSIVE */
-@media screen and (max-width:600px){
-  .form-container { width:90%; padding:15px; }
-  button { width:100%; font-size:12px; margin:5px 0; }
-  #qr-container { gap:10px; }
+.form-box {
+  position: absolute;
+  width: 100%; height: 100%;
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
+}
+
+.form-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #1d6166;
+}
+
+.form-box input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  outline: none;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.form-box input:focus {
+  border-color: #1d6166;
+}
+
+.form-box button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  background: #1d6166;
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.form-box button:hover {
+  background: #138181;
+}
+
+.toggle-link {
+  margin-top: 15px;
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+#signup-msg, #login-msg {
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ===== Blur Popup for Verification ===== */
+#verifyPopup {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+#verifyPopup .popup-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+#verifyPopup h3 {
+  color: #1d6166;
+  margin-bottom: 15px;
+}
+
+#verifyPopup button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  background: #1d6166;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
 }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-left">
-    <img src="logo.png" alt="Team Logo" class="team-logo">
-    <h1 class="EDT">INFINITE INNOVATORS</h1>
-  </div>
-  <div class="nav-right">
-    <a onclick="goTo('index.html')">Home</a>
-    <a onclick="goTo('upload.html')">Uploaded Data</a>
-  </div>
-</nav>
+<div class="container">
+  <div class="card" id="card">
+    <!-- Sign Up -->
+    <div class="form-box front">
+      <img src="logo.png" alt="Logo" class="logo">
+      <h2>Sign Up</h2>
+      <input type="email" id="signup-email" placeholder="Email">
+      <input type="password" id="signup-password" placeholder="New Password">
+      <input type="password" id="signup-confirm" placeholder="Confirm Password">
+      <button onclick="signUp()">Register</button>
+      <span class="toggle-link" onclick="flipCard()">Already have an account? Sign In</span>
+      <div id="signup-msg"></div>
+    </div>
 
-<div id="home">
-  <h2 style="cursor: default;">GENERATE QR CODE</h2>
-  <div class="form-container">
-    <label>Vendor Name:</label>
-    <input type="text" id="vendor" placeholder="Enter vendor name">
-    
-    <label>Material Type:</label>
-    <select id="material">
-      <option>Elastic Rail Clip</option>
-      <option>Rail Pad</option>
-      <option>Liner</option>
-      <option>Sleeper</option>
-    </select>
-    
-    <label>Manufacture Date:</label>
-    <input type="date" id="mfg">
-    
-    <label>Warranty Period (months):</label>
-    <input type="number" id="warranty" placeholder="Enter warranty period">
-    
-    <label>Mode:</label>
-    <select id="mode">
-      <option value="1">1 QR Code</option>
-      <option value="10">10 QR Codes</option>
-    </select>
-    
-    <button onclick="generateQR()">Generate</button>
-    <button class="clear-btn" onclick="clearAllFirebase()">Clear All</button>
+    <!-- Sign In -->
+    <div class="form-box back">
+      <img src="logo.png" alt="Logo" class="logo">
+      <h2>Sign In</h2>
+      <input type="email" id="login-email" placeholder="Email">
+      <input type="password" id="login-password" placeholder="Password">
+      <button onclick="signIn()">Login</button>
+      <span class="toggle-link" onclick="flipCard()">Don’t have an account? Sign Up</span>
+      <div id="login-msg"></div>
+    </div>
   </div>
-  
-  <div id="qr-container"></div>
-  
-  <div id="scanner">
-    <h2 style="cursor: default;">SCAN QR CODE</h2>
-    <select id="camera-select"></select>
-    <button onclick="startSelectedCamera()">Start Scanner</button>
-    <div id="reader"></div>
-    <p style="cursor: default;">or upload QR image: <input type="file" id="qr-upload" accept="image/*" onchange="readQRFile(event)"></p>
-    <div id="scan-result"></div>
+</div>
+
+<!-- Verification Popup -->
+<div id="verifyPopup">
+  <div class="popup-box">
+    <h3>Verify Your Email</h3>
+    <p>We’ve sent a verification link to your email. Please check your inbox and click the link to activate your account.</p>
+    <button onclick="closePopup()">OK</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCzzNaUWyBn_z7A5Rjt_ooR3yEfA44heJA",
   authDomain: "laserqr-fd4fa.firebaseapp.com",
   databaseURL: "https://laserqr-fd4fa-default-rtdb.firebaseio.com",
   projectId: "laserqr-fd4fa",
-  storageBucket: "laserqr-fd4fa.appspot.com",
+  storageBucket: "laserqr-fd4fa.firebasestorage.app",
   messagingSenderId: "191584527271",
   appId: "1:191584527271:web:71dad945fa1b18c0024c82",
   measurementId: "G-88ZMKEZT24"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const qrDataRef = ref(db, 'qrData');
-const uploadedRef = ref(db, 'uploadedData');
+const auth = getAuth(app);
 
-window.goTo = (page)=>{ window.location.href=page; };
-
-// ----- GENERATE QR -----
-// (code unchanged)
-async function createQRDiv(dataObj){
-  const container = document.getElementById('qr-container');
-  const url = await QRCode.toDataURL(JSON.stringify(dataObj));
-  const div = document.createElement('div');
-  div.className = 'qr-item';
-  let tableHTML = '<table>';
-  for(const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
-    let val = dataObj[key]; if(key==='Warranty') val+=' months';
-    tableHTML += `<tr><th>${key}</th><td>${val}</td></tr>`;
-  }
-  tableHTML += '</table>';
-  div.innerHTML = `<img src="${url}" width="120">${tableHTML}<a href="${url}" download="${dataObj.ID}.png">Download</a>`;
-  container.appendChild(div);
+// Flip Card
+window.flipCard = function() {
+  document.getElementById("card").classList.toggle("flip");
 }
 
-window.generateQR = async function(){
-  const vendor = document.getElementById('vendor').value.trim();
-  const material = document.getElementById('material').value;
-  const mfg = document.getElementById('mfg').value;
-  const warranty = document.getElementById('warranty').value;
-  const mode = parseInt(document.getElementById('mode').value);
-  const supplyDate = new Date().toISOString().split('T')[0];
+// Sign Up
+window.signUp = function() {
+  const email = document.getElementById("signup-email").value.trim();
+  const password = document.getElementById("signup-password").value;
+  const confirm = document.getElementById("signup-confirm").value;
+  const msg = document.getElementById("signup-msg");
 
-  if(!vendor || !mfg || !warranty){ alert('Fill all fields!'); return; }
-
-  const snap = await get(qrDataRef);
-  let existingIDs = snap.exists()? Object.keys(snap.val()):[];
-  let maxCounter = 0;
-  existingIDs.forEach(id => { const num = parseInt(id.replace(/\D/g,'')); if(num>maxCounter) maxCounter=num; });
-
-  const container = document.getElementById('qr-container');
-  container.innerHTML = '';
-
-  if(mode===1){
-    const counter=maxCounter+1;
-    const id = material.substring(0,3).toUpperCase()+counter.toString().padStart(3,'0');
-    const dataObj={ID:id,Vendor:vendor,Material:material,MFG:mfg,Warranty:warranty,SupplyDate:supplyDate};
-    await createQRDiv(dataObj);
-    set(ref(db,'qrData/'+id), dataObj);
-    set(ref(db,'uploadedData/'+id), dataObj);
-  } else if(mode===10){
-    const zip = new JSZip();
-    const promises = [];
-    for(let i=0;i<10;i++){
-      const counter=maxCounter+i+1;
-      const id = material.substring(0,3).toUpperCase()+counter.toString().padStart(3,'0');
-      const dataObj={ID:id,Vendor:vendor,Material:material,MFG:mfg,Warranty:warranty,SupplyDate:supplyDate};
-      set(ref(db,'qrData/'+id), dataObj);
-      set(ref(db,'uploadedData/'+id), dataObj);
-      promises.push(QRCode.toDataURL(JSON.stringify(dataObj)).then(url=>{
-        const imgData = url.replace(/^data:image\/(png|jpg);base64,/, '');
-        zip.file(`${id}.png`, imgData, {base64:true});
-      }));
-    }
-    await Promise.all(promises);
-    const content = await zip.generateAsync({type:"blob"});
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(content);
-    link.download = "10_QRs.zip";
-    link.textContent = "Download 10 QR Codes ZIP";
-    link.style.display = "block"; link.style.margin = "20px auto";
-    container.appendChild(link);
+  if (!email || !password || !confirm) {
+    msg.style.color = "red"; msg.textContent = "Fill all fields!";
+    return;
   }
-}
+  if(password.length < 6){ msg.style.color="red"; msg.textContent="Password must be 6+ chars"; return;}
+  if(password !== confirm){ msg.style.color="red"; msg.textContent="Passwords do not match!"; return;}
 
-// ---- CLEAR ALL ----
-window.clearAllFirebase = function(){
-  if(confirm('Delete all QR Data?')){
-    remove(ref(db,'qrData'));
-    remove(ref(db,'uploadedData'));
-    document.getElementById('qr-container').innerHTML='';
-  }
-}
-
-// ---- CAMERA SCANNER ----
-let html5QrScanner=null, cameras=[];
-Html5Qrcode.getCameras().then(camList=>{
-  cameras=camList;
-  const select=document.getElementById('camera-select');
-  if(cameras && cameras.length){
-    cameras.forEach((cam,idx)=>{
-      const option=document.createElement('option');
-      option.value=cam.id;
-      option.text=cam.label||`Camera ${idx+1}`;
-      select.appendChild(option);
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(userCredential => {
+      sendEmailVerification(userCredential.user)
+        .then(() => {
+          msg.style.color = "green"; 
+          msg.textContent = "Registered! Verify email.";
+          document.getElementById("verifyPopup").style.display = "flex";
+        });
+      signOut(auth);
+    })
+    .catch(error => {
+      msg.style.color = "red";
+      switch(error.code){
+        case "auth/email-already-in-use": msg.textContent = "Email exists. Try login!"; break;
+        case "auth/invalid-email": msg.textContent = "Invalid email!"; break;
+        default: msg.textContent = "Error. Contact dev!"; break;
+      }
+      console.error(error);
     });
-  }
-}).catch(console.error);
-
-window.startSelectedCamera=function(){
-  const cameraId=document.getElementById('camera-select').value;
-  if(!cameraId){ alert("No camera available!"); return; }
-  if(html5QrScanner) html5QrScanner.stop().then(()=>startCamera(cameraId));
-  else startCamera(cameraId);
 }
 
-function startCamera(cameraId){
-  html5QrScanner = new Html5Qrcode("reader");
-  // FIXED: pass cameraId as string
-  html5QrScanner.start(
-    cameraId,
-    { fps:10, qrbox:250 },
-    onScanSuccess,
-    errorMessage => { console.warn(errorMessage); }
-  ).catch(console.error);
+// Sign In
+window.signIn = function() {
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+  const msg = document.getElementById("login-msg");
+
+  if(!email || !password){ msg.style.color="red"; msg.textContent="Fill all fields!"; return; }
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(userCredential => {
+      if(!userCredential.user.emailVerified){
+        msg.style.color="red"; msg.textContent="Verify your email first!"; signOut(auth); return;
+      }
+      msg.style.color="green"; msg.textContent="Login successful!";
+      setTimeout(()=>{ window.location.href="home.html"; }, 1000);
+    })
+    .catch(error => {
+      msg.style.color="red";
+      switch(error.code){
+        case "auth/user-not-found": msg.textContent="Email not found! Signup first."; break;
+        case "auth/wrong-password": msg.textContent="Incorrect password!"; break;
+        case "auth/invalid-email": msg.textContent="Invalid email format!"; break;
+        default: msg.textContent="Incorrect password! or invalid Email!"; break;
+      }
+      console.error(error);
+    });
 }
 
-function onScanSuccess(decodedText){
-  const scanResultDiv=document.getElementById('scan-result');
-  scanResultDiv.innerHTML='';
-  try{
-    const dataObj=JSON.parse(decodedText);
-    set(ref(db,'qrData/'+dataObj.ID), dataObj);
-    set(ref(db,'uploadedData/'+dataObj.ID), dataObj);
-    let tableHTML='<table>';
-    for(const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
-      let val=dataObj[key]; if(key==='Warranty') val+=' months';
-      tableHTML+=`<tr><th>${key}</th><td>${val}</td></tr>`;
-    }
-    tableHTML+='</table>';
-    scanResultDiv.innerHTML=tableHTML;
-  }catch(e){ scanResultDiv.innerText=decodedText; }
-}
-
-// ---- QR IMAGE UPLOAD ----
-window.readQRFile=function(event){
-  const file=event.target.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=function(){
-    const img=new Image();
-    img.src=reader.result;
-    img.onload=function(){
-      const canvas=document.createElement('canvas');
-      canvas.width=img.width; canvas.height=img.height;
-      const ctx=canvas.getContext('2d');
-      ctx.drawImage(img,0,0);
-      const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-      const code=jsQR(imageData.data,canvas.width,canvas.height);
-      const scanResultDiv=document.getElementById('scan-result');
-      scanResultDiv.innerHTML='';
-      if(code){
-        try{
-          const dataObj=JSON.parse(code.data);
-          set(ref(db,'qrData/'+dataObj.ID), dataObj);
-          set(ref(db,'uploadedData/'+dataObj.ID), dataObj);
-          let tableHTML='<table>';
-          for(const key of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
-            let val=dataObj[key]; if(key==='Warranty') val+=' months';
-            tableHTML+=`<tr><th>${key}</th><td>${val}</td></tr>`;
-          }
-          tableHTML+='</table>';
-          scanResultDiv.innerHTML=tableHTML;
-        }catch(e){ scanResultDiv.innerText="QR data is not valid JSON"; }
-      } else { scanResultDiv.innerText="Cannot read QR"; }
-    }
-  }
-  reader.readAsDataURL(file);
+// Close Popup
+window.closePopup = function(){
+  document.getElementById("verifyPopup").style.display="none";
+  document.getElementById("card").classList.add("flip"); 
+  const msg = document.getElementById("login-msg");
+  msg.style.color = "green";
+  msg.textContent = "Verify email then login!";
 }
 </script>
 

@@ -4,62 +4,77 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Infinite Innovators - Login</title>
-
 <style>
+/* ===== Global Styles ===== */
 body {
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
   font-family: "Poppins", sans-serif;
   height: 100vh;
-  display: flex; justify-content: center; align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* stick to top */
+  padding-top: 50px; /* distance from top */
   background: linear-gradient(135deg, #1d6166, #0f2027);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
+/* Container & Card */
 .container {
-  width: 350px; height: 500px;
+  width: 350px;
+  max-width: 95%;
   perspective: 1000px;
 }
-
 .card {
-  width: 100%; height: 100%;
-  position: relative;
+  width: 100%;
   transform-style: preserve-3d;
-  transition: transform 1s;
+  transition: transform 0.8s;
+  position: relative;
 }
 
-.card.flip {
-  transform: rotateY(180deg);
-}
+/* Flip */
+.card.flip { transform: rotateY(180deg); }
 
+/* Form Box - Front/Back stacked exactly */
 .form-box {
-  position: absolute;
-  width: 100%; height: 100%;
+  width: 100%;
   background: #fff;
   border-radius: 20px;
-  padding: 30px;
+  padding: 25px 20px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-sizing: border-box;
+  position: absolute; /* stack front/back */
+  top: 0; left: 0;
 }
 
+/* Front & Back */
+.front { z-index: 2; }
+.back { transform: rotateY(180deg); }
+
+/* Logo */
 .logo {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 10px;
+  width: 80px;
+  height: auto;
+  margin-bottom: 15px;
 }
 
+/* Headings */
 .form-box h2 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   color: #1d6166;
+  font-size: 1.5em;
 }
 
+/* Inputs */
 .form-box input {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
+  margin: 8px 0;
   border: none;
   border-bottom: 2px solid #ccc;
   outline: none;
@@ -67,10 +82,9 @@ body {
   transition: 0.3s;
 }
 
-.form-box input:focus {
-  border-color: #1d6166;
-}
+.form-box input:focus { border-color: #1d6166; }
 
+/* Buttons */
 .form-box button {
   width: 100%;
   padding: 12px;
@@ -85,12 +99,11 @@ body {
   transition: 0.3s;
 }
 
-.form-box button:hover {
-  background: #138181;
-}
+.form-box button:hover { background: #138181; }
 
+/* Toggle Links */
 .toggle-link {
-  margin-top: 15px;
+  margin-top: 12px;
   display: block;
   text-align: center;
   font-size: 14px;
@@ -99,17 +112,15 @@ body {
   text-decoration: underline;
 }
 
-.back {
-  transform: rotateY(180deg);
-}
-
+/* Messages */
 #signup-msg, #login-msg {
   margin-top: 10px;
   font-size: 14px;
   text-align: center;
+  word-wrap: break-word;
 }
 
-/* ===== Blur Popup for Verification ===== */
+/* Verification Popup */
 #verifyPopup {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -118,20 +129,24 @@ body {
   display: none;
   justify-content: center;
   align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 #verifyPopup .popup-box {
   background: #fff;
-  padding: 30px;
+  padding: 20px;
   border-radius: 15px;
   text-align: center;
-  width: 300px;
+  width: 100%;
+  max-width: 320px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
 #verifyPopup h3 {
   color: #1d6166;
   margin-bottom: 15px;
+  font-size: 1.2em;
 }
 
 #verifyPopup button {
@@ -142,6 +157,24 @@ body {
   color: #fff;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* ===== Responsive ===== */
+@media screen and (max-width: 1024px) {
+  .container { width: 300px; }
+  .form-box { padding: 20px; }
+  .form-box h2 { font-size: 1.4em; }
+  .form-box input, .form-box button { font-size: 14px; padding: 10px; }
+  .logo { width: 70px; }
+}
+
+@media screen and (max-width: 600px) {
+  body { padding-top: 30px; }
+  .container { width: 90%; }
+  .form-box { padding: 15px; }
+  .form-box h2 { font-size: 1.3em; }
+  .form-box input, .form-box button { font-size: 13px; padding: 8px; }
+  .logo { width: 60px; }
 }
 </style>
 </head>
@@ -187,7 +220,6 @@ body {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCzzNaUWyBn_z7A5Rjt_ooR3yEfA44heJA",
   authDomain: "laserqr-fd4fa.firebaseapp.com",
@@ -203,9 +235,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Flip Card
-window.flipCard = function() {
-  document.getElementById("card").classList.toggle("flip");
-}
+window.flipCard = function() { document.getElementById("card").classList.toggle("flip"); }
 
 // Sign Up
 window.signUp = function() {
@@ -214,29 +244,24 @@ window.signUp = function() {
   const confirm = document.getElementById("signup-confirm").value;
   const msg = document.getElementById("signup-msg");
 
-  if (!email || !password || !confirm) {
-    msg.style.color = "red"; msg.textContent = "Fill all fields!";
-    return;
-  }
-  if(password.length < 6){ msg.style.color="red"; msg.textContent="Password must be 6+ chars"; return;}
-  if(password !== confirm){ msg.style.color="red"; msg.textContent="Passwords do not match!"; return;}
+  if(!email || !password || !confirm){ msg.style.color="red"; msg.textContent="Fill all fields!"; return; }
+  if(password.length < 6){ msg.style.color="red"; msg.textContent="Password must be 6+ chars"; return; }
+  if(password !== confirm){ msg.style.color="red"; msg.textContent="Passwords do not match!"; return; }
 
   createUserWithEmailAndPassword(auth, email, password)
     .then(userCredential => {
-      sendEmailVerification(userCredential.user)
-        .then(() => {
-          msg.style.color = "green"; 
-          msg.textContent = "Registered! Verify email.";
-          document.getElementById("verifyPopup").style.display = "flex";
-        });
+      sendEmailVerification(userCredential.user).then(() => {
+        msg.style.color="green"; msg.textContent="Registered! Verify email.";
+        document.getElementById("verifyPopup").style.display="flex";
+      });
       signOut(auth);
     })
     .catch(error => {
-      msg.style.color = "red";
+      msg.style.color="red";
       switch(error.code){
-        case "auth/email-already-in-use": msg.textContent = "Email exists. Try login!"; break;
-        case "auth/invalid-email": msg.textContent = "Invalid email!"; break;
-        default: msg.textContent = "Error. Contact dev!"; break;
+        case "auth/email-already-in-use": msg.textContent="Email exists. Try login!"; break;
+        case "auth/invalid-email": msg.textContent="Invalid email!"; break;
+        default: msg.textContent="Error. Contact dev!"; break;
       }
       console.error(error);
     });
@@ -252,9 +277,7 @@ window.signIn = function() {
 
   signInWithEmailAndPassword(auth, email, password)
     .then(userCredential => {
-      if(!userCredential.user.emailVerified){
-        msg.style.color="red"; msg.textContent="Verify your email first!"; signOut(auth); return;
-      }
+      if(!userCredential.user.emailVerified){ msg.style.color="red"; msg.textContent="Verify your email first!"; signOut(auth); return; }
       msg.style.color="green"; msg.textContent="Login successful!";
       setTimeout(()=>{ window.location.href="home.html"; }, 1000);
     })
@@ -264,7 +287,7 @@ window.signIn = function() {
         case "auth/user-not-found": msg.textContent="Email not found! Signup first."; break;
         case "auth/wrong-password": msg.textContent="Incorrect password!"; break;
         case "auth/invalid-email": msg.textContent="Invalid email format!"; break;
-        default: msg.textContent="Incorrect password! or invalid Email!"; break;
+        default: msg.textContent="Incorrect password or invalid Email!"; break;
       }
       console.error(error);
     });
@@ -275,10 +298,8 @@ window.closePopup = function(){
   document.getElementById("verifyPopup").style.display="none";
   document.getElementById("card").classList.add("flip"); 
   const msg = document.getElementById("login-msg");
-  msg.style.color = "green";
-  msg.textContent = "Verify email then login!";
+  msg.style.color = "green"; msg.textContent = "Verify email then login!";
 }
 </script>
-
 </body>
 </html>

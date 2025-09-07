@@ -96,7 +96,7 @@ button.clear-btn { background:#c0392b; }
     </select>
     
     <button onclick="generateQR()">Generate</button>
-    <button class="clear-btn" onclick="clearAllFirebase()">Clear All</button>
+    <button type="button" class="clear-btn" onclick="clearAllFirebase()">Clear All</button>
   </div>
   
   <div id="qr-container"></div>
@@ -153,7 +153,6 @@ Html5Qrcode.getCameras().then(camList=>{
     cameras.forEach((cam,idx)=>{
       const option=document.createElement('option');
       option.value=cam.id;
-      // Try to label based on facingMode if available
       if(cam.label.toLowerCase().includes("back") || cam.label.toLowerCase().includes("rear")){
         option.text="Back Camera";
       } else if(cam.label.toLowerCase().includes("front")){
@@ -164,27 +163,31 @@ Html5Qrcode.getCameras().then(camList=>{
       select.appendChild(option);
     });
 
-    // Default to back camera if available
     const backOption=[...select.options].find(o=>o.text.includes("Back"));
     if(backOption) select.value=backOption.value;
   }
 }).catch(console.error);
 
-window.startSelectedCamera=function(){
-  const cameraId=document.getElementById('camera-select').value;
+window.startSelectedCamera = async function(){
+  const cameraId = document.getElementById('camera-select').value;
   if(!cameraId){ alert("No camera available!"); return; }
-  if(html5QrScanner) html5QrScanner.stop().then(()=>startCamera(cameraId));
-  else startCamera(cameraId);
-}
 
-function startCamera(cameraId){
-  html5QrScanner = new Html5Qrcode("reader");
-  html5QrScanner.start(
-    cameraId,
-    { fps:10, qrbox:250 },
-    onScanSuccess,
-    errorMessage => { console.warn(errorMessage); }
-  ).catch(console.error);
+  try {
+    if(html5QrScanner){
+      await html5QrScanner.stop();
+      html5QrScanner.clear();
+    }
+    html5QrScanner = new Html5Qrcode("reader");
+    html5QrScanner.start(
+      cameraId,
+      { fps:10, qrbox:250 },
+      onScanSuccess,
+      errorMessage => { console.warn(errorMessage); }
+    );
+  } catch(err){
+    console.error(err);
+    alert("Failed to start camera: " + err.message);
+  }
 }
 
 // ========== REST OF QR CODE FUNCTIONS (same as before) ==========
@@ -253,12 +256,9 @@ window.generateQR = async function(){
   }
 }
 
+// ✅ Clear All now refreshes page
 window.clearAllFirebase = function(){
-  if(confirm('Delete all QR Data?')){
-    remove(ref(db,'qrData'));
-    remove(ref(db,'uploadedData'));
-    document.getElementById('qr-container').innerHTML='';
-  }
+  location.reload();
 }
 
 function onScanSuccess(decodedText){

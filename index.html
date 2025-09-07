@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Infinite Innovators - Login</title>
 <style>
 /* ===== Global Styles ===== */
@@ -101,6 +101,20 @@ body {
 
 .form-box button:hover { background: #138181; }
 
+/* Reset-style button (below login) */
+.form-box .reset-btn {
+  margin-top: 10px;
+  padding: 10px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px dashed #cfcfcf;
+  background: transparent;
+  color: #1d6166;
+  cursor: pointer;
+  font-weight: 600;
+}
+.form-box .reset-btn:hover { background: rgba(29,97,102,0.06); }
+
 /* Toggle Links */
 .toggle-link {
   margin-top: 12px;
@@ -121,7 +135,7 @@ body {
 }
 
 /* Verification Popup */
-#verifyPopup {
+#verifyPopup, #resetPopup {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.6);
@@ -133,23 +147,23 @@ body {
   box-sizing: border-box;
 }
 
-#verifyPopup .popup-box {
+.popup-box {
   background: #fff;
   padding: 20px;
   border-radius: 15px;
   text-align: center;
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
-#verifyPopup h3 {
+.popup-box h3 {
   color: #1d6166;
   margin-bottom: 15px;
   font-size: 1.2em;
 }
 
-#verifyPopup button {
+.popup-box button {
   margin-top: 15px;
   padding: 10px 20px;
   border: none;
@@ -201,6 +215,10 @@ body {
       <input type="email" id="login-email" placeholder="Email">
       <input type="password" id="login-password" placeholder="Password">
       <button onclick="signIn()">Login</button>
+
+      <!-- Reset password button added here (below Login) -->
+      <button class="reset-btn" onclick="resetPassword()">Reset Password</button>
+
       <span class="toggle-link" onclick="flipCard()">Don’t have an account? Sign Up</span>
       <div id="login-msg"></div>
     </div>
@@ -216,9 +234,25 @@ body {
   </div>
 </div>
 
+<!-- Reset-confirmation Popup -->
+<div id="resetPopup">
+  <div class="popup-box">
+    <h3>Check your email</h3>
+    <p>A password reset link has been sent to <strong id="reset-email"></strong>. Follow the link to reset your password.</p>
+    <button onclick="closeResetPopup()">OK</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signOut
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzzNaUWyBn_z7A5Rjt_ooR3yEfA44heJA",
@@ -293,12 +327,45 @@ window.signIn = function() {
     });
 }
 
-// Close Popup
+// Reset Password
+window.resetPassword = function(){
+  const email = document.getElementById("login-email").value.trim();
+  const msg = document.getElementById("login-msg");
+
+  if(!email){ msg.style.color="red"; msg.textContent="Enter your email to receive reset link."; return; }
+
+  sendPasswordResetEmail(auth, email)
+    .then(() => {
+      // show reset popup
+      document.getElementById("reset-email").textContent = email;
+      document.getElementById("resetPopup").style.display = "flex";
+      msg.textContent = "";
+    })
+    .catch(error => {
+      msg.style.color="red";
+      switch(error.code){
+        case "auth/user-not-found": msg.textContent="No account with this email."; break;
+        case "auth/invalid-email": msg.textContent="Invalid email format!"; break;
+        default: msg.textContent="Could not send reset link. Try again later."; break;
+      }
+      console.error(error);
+    });
+}
+
+// Close Popup (verify)
 window.closePopup = function(){
   document.getElementById("verifyPopup").style.display="none";
   document.getElementById("card").classList.add("flip"); 
   const msg = document.getElementById("login-msg");
   msg.style.color = "green"; msg.textContent = "Verify email then login!";
+}
+
+// Close Reset Popup
+window.closeResetPopup = function(){
+  document.getElementById("resetPopup").style.display = "none";
+  const msg = document.getElementById("login-msg");
+  msg.style.color = "green";
+  msg.textContent = "Reset email sent — check your inbox.";
 }
 </script>
 </body>

@@ -81,7 +81,6 @@ body {
   font-size: 14px;
   transition: 0.3s;
 }
-
 .form-box input:focus { border-color: #1d6166; }
 
 /* Buttons */
@@ -98,7 +97,6 @@ body {
   cursor: pointer;
   transition: 0.3s;
 }
-
 .form-box button:hover { background: #138181; }
 
 /* Reset-style button (below login) */
@@ -146,7 +144,6 @@ body {
   padding: 10px;
   box-sizing: border-box;
 }
-
 .popup-box {
   background: #fff;
   padding: 20px;
@@ -156,13 +153,11 @@ body {
   max-width: 360px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
-
 .popup-box h3 {
   color: #1d6166;
   margin-bottom: 15px;
   font-size: 1.2em;
 }
-
 .popup-box button {
   margin-top: 15px;
   padding: 10px 20px;
@@ -181,7 +176,6 @@ body {
   .form-box input, .form-box button { font-size: 14px; padding: 10px; }
   .logo { width: 70px; }
 }
-
 @media screen and (max-width: 600px) {
   body { padding-top: 30px; }
   .container { width: 90%; }
@@ -200,6 +194,7 @@ body {
     <div class="form-box front">
       <img src="logo.png" alt="Logo" class="logo">
       <h2>Sign Up</h2>
+      <input type="text" id="signup-name" placeholder="Full Name">
       <input type="email" id="signup-email" placeholder="Email">
       <input type="password" id="signup-password" placeholder="New Password">
       <input type="password" id="signup-confirm" placeholder="Confirm Password">
@@ -215,10 +210,7 @@ body {
       <input type="email" id="login-email" placeholder="Email">
       <input type="password" id="login-password" placeholder="Password">
       <button onclick="signIn()">Login</button>
-
-      <!-- Reset password button added here (below Login) -->
       <button class="reset-btn" onclick="resetPassword()">Reset Password</button>
-
       <span class="toggle-link" onclick="flipCard()">Don’t have an account? Sign Up</span>
       <div id="login-msg"></div>
     </div>
@@ -251,7 +243,8 @@ import {
   signInWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
-  signOut
+  signOut,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -269,25 +262,36 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Flip Card
-window.flipCard = function() { document.getElementById("card").classList.toggle("flip"); }
+window.flipCard = function() {
+  document.getElementById("card").classList.toggle("flip");
+}
 
 // Sign Up
 window.signUp = function() {
+  const name = document.getElementById("signup-name").value.trim();
   const email = document.getElementById("signup-email").value.trim();
   const password = document.getElementById("signup-password").value;
   const confirm = document.getElementById("signup-confirm").value;
   const msg = document.getElementById("signup-msg");
 
-  if(!email || !password || !confirm){ msg.style.color="red"; msg.textContent="Fill all fields!"; return; }
-  if(password.length < 6){ msg.style.color="red"; msg.textContent="Password must be 6+ chars"; return; }
-  if(password !== confirm){ msg.style.color="red"; msg.textContent="Passwords do not match!"; return; }
+  if(!name || !email || !password || !confirm){ 
+    msg.style.color="red"; msg.textContent="Fill all fields!"; return; 
+  }
+  if(password.length < 6){ 
+    msg.style.color="red"; msg.textContent="Password must be 6+ chars"; return; 
+  }
+  if(password !== confirm){ 
+    msg.style.color="red"; msg.textContent="Passwords do not match!"; return; 
+  }
 
   createUserWithEmailAndPassword(auth, email, password)
-    .then(userCredential => {
-      sendEmailVerification(userCredential.user).then(() => {
-        msg.style.color="green"; msg.textContent="Registered! Verify email.";
-        document.getElementById("verifyPopup").style.display="flex";
-      });
+    .then(async (userCredential) => {
+      await updateProfile(userCredential.user, { displayName: name });
+      await sendEmailVerification(userCredential.user);
+
+      msg.style.color="green"; 
+      msg.textContent="Registered! Verify email.";
+      document.getElementById("verifyPopup").style.display="flex";
       signOut(auth);
     })
     .catch(error => {
@@ -307,12 +311,19 @@ window.signIn = function() {
   const password = document.getElementById("login-password").value;
   const msg = document.getElementById("login-msg");
 
-  if(!email || !password){ msg.style.color="red"; msg.textContent="Fill all fields!"; return; }
+  if(!email || !password){ 
+    msg.style.color="red"; msg.textContent="Fill all fields!"; return; 
+  }
 
   signInWithEmailAndPassword(auth, email, password)
     .then(userCredential => {
-      if(!userCredential.user.emailVerified){ msg.style.color="red"; msg.textContent="Verify your email first!"; signOut(auth); return; }
-      msg.style.color="green"; msg.textContent="Login successful!";
+      if(!userCredential.user.emailVerified){ 
+        msg.style.color="red"; msg.textContent="Verify your email first!"; 
+        signOut(auth); 
+        return; 
+      }
+      msg.style.color="green"; 
+      msg.textContent="Login successful!";
       setTimeout(()=>{ window.location.href="home.html"; }, 1000);
     })
     .catch(error => {
@@ -332,11 +343,12 @@ window.resetPassword = function(){
   const email = document.getElementById("login-email").value.trim();
   const msg = document.getElementById("login-msg");
 
-  if(!email){ msg.style.color="red"; msg.textContent="Enter your email to receive reset link."; return; }
+  if(!email){ 
+    msg.style.color="red"; msg.textContent="Enter your email to receive reset link."; return; 
+  }
 
   sendPasswordResetEmail(auth, email)
     .then(() => {
-      // show reset popup
       document.getElementById("reset-email").textContent = email;
       document.getElementById("resetPopup").style.display = "flex";
       msg.textContent = "";

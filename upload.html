@@ -7,19 +7,19 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <style>
 body { font-family: Arial, sans-serif; background: #f4f6f8; text-align:center; margin:0; }
-nav { cursor: default; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background:#2c3e50; color:white; flex-wrap: wrap; }
-.nav-left { cursor: default; display: flex; align-items: center; margin-bottom: 5px; }
-.team-logo { cursor: default; width: 40px; height: 40px; margin-right: 10px; border-radius: 8px; }
-.EDT { cursor: default; font-size: 20px; margin:0; }
-.nav-right a { cursor: default; color:white; margin-left: 10px; text-decoration:none; font-weight:bold; }
-.nav-right a:hover { cursor: default; text-decoration: underline; color:#ecf0f1; }
+nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background:#2c3e50; color:white; flex-wrap: wrap; }
+.nav-left { display: flex; align-items: center; margin-bottom: 5px; }
+.team-logo { width: 40px; height: 40px; margin-right: 10px; border-radius: 8px; }
+.EDT { font-size: 20px; margin:0; }
+.nav-right a { color:white; margin-left: 10px; text-decoration:none; font-weight:bold; cursor:pointer; }
+.nav-right a:hover { text-decoration: underline; color:#ecf0f1; }
 
-h2 { cursor: default; margin-top:20px; color:#34495e; font-size:18px; }
+h2 { margin-top:20px; color:#34495e; font-size:18px; }
 .search-container { margin:15px auto; }
 .search-container input { padding:8px; width:90%; max-width:300px; border-radius:5px; border:1px solid #ccc; }
 
 table { width:95%; max-width:900px; margin:15px auto; border-collapse: collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.1); font-size:12px; }
-th, td { cursor: default; padding:10px 6px; border-bottom:1px solid #ddd; text-align:center; word-break:break-word; }
+th, td { padding:10px 6px; border-bottom:1px solid #ddd; text-align:center; word-break:break-word; }
 th { background:#2980b9; color:white; }
 tr:hover { background:#d1e7ff; }
 
@@ -27,6 +27,7 @@ button { padding:5px 8px; border-radius:5px; border:none; cursor:pointer; font-w
 button.view-btn { background:#27ae60; color:white; }
 button.delete-btn { background:#c0392b; color:white; }
 button.delete-all-btn { background:#e67e22; color:white; margin-bottom:10px; }
+button.scan-btn { background:#2980b9; color:white; margin:10px; }
 
 #info-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; padding:10px; box-sizing:border-box; }
 #info-modal .modal-content { background:white; padding:15px; border-radius:10px; width:95%; max-width:350px; text-align:left; }
@@ -36,10 +37,12 @@ button.delete-all-btn { background:#e67e22; color:white; margin-bottom:10px; }
 #info-modal tr:nth-child(even) td { background:#ecf0f1; }
 #info-modal tr:nth-child(odd) td { background:#fdfdfd; }
 #info-modal tr:hover td { background:#d1e7ff; }
-#qr-image { display:block; margin:10px auto; max-width:100%; }
+#qr-image { display:block; margin:10px auto; max-width:100%; height:auto; }
 #download-qr { display:block; margin:10px auto; padding:5px 10px; border:none; border-radius:5px; background:#2980b9; color:white; cursor:pointer; font-size:12px; }
 
-/* MOBILE RESPONSIVE TABLE */
+#ai-report { margin-top:10px; background:#f1f1f1; padding:8px; border-radius:5px; font-size:12px; text-align:left; }
+
+/* MOBILE */
 @media screen and (max-width:600px){
   th, td { font-size:10px; padding:8px 4px; }
   .nav-right a { margin-left:8px; font-size:12px; }
@@ -67,6 +70,7 @@ button.delete-all-btn { background:#e67e22; color:white; margin-bottom:10px; }
     <input type="text" id="search-input" placeholder="Search by ID, Vendor, Material" onkeyup="searchTable()">
   </div>
   <button class="delete-all-btn" onclick="deleteAll()">Delete All</button>
+  <button class="scan-btn" onclick="scanQR()">Scan & Analyze QR</button>
   <table id="data-table">
     <thead>
       <tr>
@@ -84,16 +88,17 @@ button.delete-all-btn { background:#e67e22; color:white; margin-bottom:10px; }
   <div class="modal-content">
     <h3>QR Info</h3>
     <table id="modal-table"></table>
-    <canvas id="qr-image"></canvas>
+    <canvas id="qr-image" width="200" height="200"></canvas>
+    <div id="ai-report"></div>
     <button id="download-qr">Download QR</button>
     <button onclick="closeModal()">Close</button>
   </div>
 </div>
 
 <script type="module">
-// ===== FIREBASE SETUP =====
+// ===== FIREBASE =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, get, child, query, orderByChild } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzzNaUWyBn_z7A5Rjt_ooR3yEfA44heJA",
@@ -119,11 +124,28 @@ function fetchUploadedData() {
     snapshot.forEach(snapItem => {
       const data = snapItem.val();
       const key = snapItem.key;
+
+      // Determine row highlight if warranty expired or missing inspections
+      let rowClass = '';
+      const now = new Date();
+      if(data.SupplyDate && data.Warranty){
+        const supplyDate = new Date(data.SupplyDate);
+        const warrantyEnd = new Date(supplyDate);
+        warrantyEnd.setMonth(warrantyEnd.getMonth() + parseInt(data.Warranty));
+        if(now > warrantyEnd) rowClass = 'expired-row';
+      }
+      if(data.Inspections && data.Inspections.length>0){
+        const lastInspection = new Date(data.Inspections[data.Inspections.length-1].date);
+        const diffMonths = (now.getFullYear() - lastInspection.getFullYear())*12 + (now.getMonth() - lastInspection.getMonth());
+        if(diffMonths > 12) rowClass = 'expired-row';
+      }
+
       const row = document.createElement('tr');
+      if(rowClass) row.style.background='#f8d7da'; // red shade for expired/due
       row.innerHTML = `
         <td>${data.ID}</td>
-        <td>${data.Vendor}</td>
-        <td>${data.Material}</td>
+        <td>${data.Vendor || 'N/A'}</td>
+        <td>${data.Material || 'N/A'}</td>
         <td>
           <button class="view-btn" onclick="viewInfo('${key}')">View</button>
           <button class="delete-btn" onclick="deleteData('${key}')">Delete</button>
@@ -138,40 +160,43 @@ function fetchUploadedData() {
 window.viewInfo = function(key){
   get(child(uploadedRef, key)).then(snap=>{
     if(!snap.exists()) return;
-    const data = snap.val();
-    const modal = document.getElementById('info-modal');
-    const table = document.getElementById('modal-table');
-    const canvas = document.getElementById('qr-image');
-    const downloadBtn = document.getElementById('download-qr');
-
-    table.innerHTML = '';
-    for(const k of ['ID','Vendor','Material','MFG','Warranty','SupplyDate']){
-      if(data[k]===undefined) continue;
-      let val = data[k];
-      if(k==='Warranty') val += ' months';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<th>${k}</th><td>${val}</td>`;
-      table.appendChild(tr);
-    }
-
-    // CLEAR previous QR before drawing new
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // GENERATE QR
-    QRCode.toCanvas(canvas, JSON.stringify(data), {width:200}, function(err){
-      if(err) console.error(err);
-    });
-
-    downloadBtn.onclick = function(){
-      const link=document.createElement('a');
-      link.href = canvas.toDataURL("image/png");
-      link.download = data.ID + "_QR.png";
-      link.click();
-    }
-
-    modal.style.display='flex';
+    showModalWithData(snap.val());
   });
+}
+
+function showModalWithData(data){
+  const modal = document.getElementById('info-modal');
+  const table = document.getElementById('modal-table');
+  const canvas = document.getElementById('qr-image');
+  const aiReport = document.getElementById('ai-report');
+  const downloadBtn = document.getElementById('download-qr');
+
+  table.innerHTML = '';
+  ['ID','Vendor','Material','MFG','Warranty','SupplyDate'].forEach(k=>{
+    if(data[k]===undefined) return;
+    let val = data[k];
+    if(k==='Warranty') val += ' months';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<th>${k}</th><td>${val}</td>`;
+    table.appendChild(tr);
+  });
+
+  // QR
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  QRCode.toCanvas(canvas, JSON.stringify(data), {width:200}, function(err){ if(err) console.error(err); });
+
+  // AI report
+  aiReport.innerHTML = generateAIReport(data);
+
+  downloadBtn.onclick = function(){
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL("image/png");
+    link.download = data.ID + "_QR.png";
+    link.click();
+  }
+
+  modal.style.display='flex';
 }
 
 window.closeModal = function(){ document.getElementById('info-modal').style.display='none'; }
@@ -211,29 +236,63 @@ window.searchTable = function(){
   });
 }
 
-// ===== ADD NEW UNIQUE QR =====
-window.addNewQR = async function(data){
-  const q = query(uploadedRef, orderByChild('Vendor'));
-  const snap = await get(q);
-  let exists = false;
-  snap.forEach(s=>{
-    if(s.val().Vendor === data.Vendor && s.val().Material === data.Material){
-      exists = true;
-    }
-  });
-  if(exists){ alert('Duplicate entry! Not added.'); return; }
-
-  let maxID = 0;
-  snap.forEach(s=>{
-    const id = parseInt(s.val().ID);
-    if(id > maxID) maxID = id;
-  });
-  data.ID = maxID+1;
-  push(uploadedRef, data);
-}
-
 // ===== NAVIGATION =====
 window.goTo = function(page){ window.location.href = page; }
+
+// ===== AI REPORT WITH ALERTS =====
+function generateAIReport(data){
+  const report = [];
+  const notifications = [];
+  const now = new Date();
+
+  // --- WARRANTY CHECK ---
+  if(data.Warranty && data.SupplyDate){
+    const supplyDate = new Date(data.SupplyDate);
+    const warrantyEnd = new Date(supplyDate);
+    warrantyEnd.setMonth(warrantyEnd.getMonth() + parseInt(data.Warranty));
+    if(now > warrantyEnd){
+      report.push('<span style="color:red;">Warranty: ❌ Expired</span>');
+      notifications.push("Warranty expired for this item.");
+    } else {
+      report.push('<span style="color:green;">Warranty: ✅ Valid until ' + warrantyEnd.toDateString() + '</span>');
+    }
+  } else {
+    report.push('<span style="color:orange;">Warranty info missing</span>');
+    notifications.push("Warranty info missing.");
+  }
+
+  // --- INSPECTION CHECK ---
+  if(data.Inspections && data.Inspections.length > 0){
+    const lastInspection = new Date(data.Inspections[data.Inspections.length-1].date);
+    report.push("Last Inspection: " + lastInspection.toDateString());
+    const diffMonths = (now.getFullYear() - lastInspection.getFullYear())*12 + (now.getMonth() - lastInspection.getMonth());
+    if(diffMonths > 12){
+      notifications.push("Last inspection over a year ago! ⚠️");
+      report.push('<span style="color:red;">⚠️ Inspection overdue</span>');
+    }
+  } else {
+    report.push('<span style="color:red;">No inspection data available ⚠️</span>');
+    notifications.push("No inspection data available.");
+  }
+
+  // --- MANDATORY FIELDS CHECK ---
+  ['Vendor','Material','SupplyDate'].forEach(field=>{
+    if(!data[field]){
+      notifications.push(`Missing mandatory field: ${field}`);
+      report.push(`<span style="color:red;">⚠️ Missing ${field}</span>`);
+    }
+  });
+
+  // --- NOTIFICATIONS PANEL ---
+  if(notifications.length > 0){
+    report.unshift('<b>Notifications:</b><ul style="padding-left:20px;">' + notifications.map(n=>'<li style="color:red;">'+n+'</li>').join('') + '</ul>');
+  }
+
+  return report.join('<br>');
+}
+
+// ===== SCAN PLACEHOLDER =====
+window.scanQR = function(){ alert("QR scanning feature not implemented in this demo."); }
 
 fetchUploadedData();
 </script>
